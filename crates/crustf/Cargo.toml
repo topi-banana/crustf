@@ -1,0 +1,22 @@
+[package]
+name = "crustf"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Pure Rust JVM class-file emitter with a fluent assembler-style builder"
+keywords = ["jvm", "bytecode", "classfile", "assembler", "java"]
+categories = ["compilers", "encoding"]
+
+[features]
+default = ["std"]
+std = ["crustf-spec/std", "crustf-asm/std"]
+
+[dependencies]
+crustf-asm = { workspace = true }
+crustf-spec = { workspace = true }
+
+[lints]
+workspace = true

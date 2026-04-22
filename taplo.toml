@@ -1,0 +1,19 @@
+include = ["**/Cargo.toml", "taplo.toml"]
+
+[formatting]
+align_entries = false
+array_auto_collapse = true
+array_auto_expand = true
+column_width = 100
+compact_arrays = true
+compact_inline_tables = false
+indent_string = "    "
+reorder_keys = false
+trailing_newline = true
+
+[[rule]]
+include = ["**/Cargo.toml"]
+keys = ["dependencies", "dev-dependencies", "build-dependencies"]
+
+[rule.formatting]
+reorder_keys = true

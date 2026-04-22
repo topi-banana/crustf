@@ -1,0 +1,22 @@
+[package]
+name = "crustf-asm"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Fluent assembler-style builder for JVM class files"
+keywords = ["jvm", "bytecode", "classfile", "assembler"]
+categories = ["compilers"]
+
+[features]
+default = ["std"]
+std = ["crustf-spec/std"]
+
+[dependencies]
+bitflags = { workspace = true }
+crustf-spec = { workspace = true }
+
+[lints]
+workspace = true

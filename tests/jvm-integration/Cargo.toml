@@ -1,0 +1,19 @@
+[package]
+name = "crustf-jvm-integration-tests"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+crustf = { workspace = true }
+
+[dev-dependencies]
+crustf = { workspace = true }
+
+[lints]
+workspace = true
