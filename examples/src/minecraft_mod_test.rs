@@ -16,11 +16,11 @@
 //! "runServer", at = @At("HEAD"))` — produced by [`crustf::Annotation`]
 //! and [`crustf::ElementValue`] without reaching into the spec layer.
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::env;
 use std::fs::{self, File};
-use std::io::Write;
-use std::path::PathBuf;
+use std::io::{BufWriter, Write};
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use crustf::{AccessFlags, Annotation, ClassFileBuilder, ElementValue, MethodBuilder, Version};
@@ -32,8 +32,9 @@ const CLASS_INTERNAL: &str = "com/example/mixin/HelloModMixin";
 const MIXIN_PACKAGE: &str = "com.example.mixin";
 const MOD_ID: &str = "hello-mod";
 
-// --- fabric.mod.json ---------------------------------------------------------
-
+/// Subset of the Fabric Loader descriptor schema this example populates.
+/// `BTreeMap` keeps the emitted JSON key order stable across runs — useful
+/// when consumers diff the generated `fabric.mod.json`.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct FabricMod {
@@ -41,21 +42,13 @@ struct FabricMod {
     id: String,
     version: String,
     name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    environment: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    license: Option<String>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    description: String,
+    environment: String,
+    license: String,
     mixins: Vec<String>,
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    depends: HashMap<String, String>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    depends: BTreeMap<String, String>,
     authors: Vec<String>,
 }
-
-// --- mixin config JSON -------------------------------------------------------
 
 #[derive(Serialize)]
 struct MixinConfig {
@@ -72,8 +65,6 @@ struct MixinInjectors {
     #[serde(rename = "defaultRequire")]
     default_require: u32,
 }
-
-// --- main --------------------------------------------------------------------
 
 fn main() -> ExitCode {
     let out_dir = env::args()
@@ -93,7 +84,7 @@ fn main() -> ExitCode {
     }
 }
 
-fn run(out_dir: &PathBuf) -> Result<PathBuf, Box<dyn std::error::Error>> {
+fn run(out_dir: &Path) -> Result<PathBuf, Box<dyn std::error::Error>> {
     fs::create_dir_all(out_dir)?;
 
     let class_bytes = build_mixin_class()?;
@@ -101,7 +92,9 @@ fn run(out_dir: &PathBuf) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let mixin_json = serde_json::to_string_pretty(&mixin_config())?;
 
     let jar_path = out_dir.join(format!("{MOD_ID}.jar"));
-    let mut jar = ZipWriter::new(File::create(&jar_path)?);
+    // `BufWriter` amortises the many small header writes the ZIP writer
+    // performs per entry; without it each header is a separate syscall.
+    let mut jar = ZipWriter::new(BufWriter::new(File::create(&jar_path)?));
     let opts = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
 
     jar.start_file("META-INF/MANIFEST.MF", opts)?;
@@ -177,20 +170,19 @@ fn build_mixin_class() -> crustf::Result<Vec<u8>> {
 }
 
 fn fabric_mod_descriptor() -> FabricMod {
-    let mut depends = HashMap::new();
-    depends.insert("fabricloader".into(), ">=0.15.0".into());
-    depends.insert("minecraft".into(), ">=1.20".into());
-
     FabricMod {
         schema_version: 1,
         id: MOD_ID.into(),
         version: "1.0.0".into(),
         name: "Hello Mod".into(),
-        description: Some("A hello-world Fabric mod built with crustf".into()),
-        environment: Some("*".into()),
-        license: Some("MIT".into()),
+        description: "A hello-world Fabric mod built with crustf".into(),
+        environment: "*".into(),
+        license: "MIT".into(),
         mixins: vec![format!("{MOD_ID}.mixins.json")],
-        depends,
+        depends: BTreeMap::from([
+            ("fabricloader".into(), ">=0.15.0".into()),
+            ("minecraft".into(), ">=1.20".into()),
+        ]),
         authors: vec!["crustf contributors".into()],
     }
 }
