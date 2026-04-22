@@ -10,6 +10,7 @@ use crustf_spec::error::Result;
 use crustf_spec::{Method, MethodAccess};
 
 use crate::access::AccessFlags;
+use crate::annotation::{push_annotation_attrs, Annotation};
 use crate::code::CodeBuilder;
 use crate::util::push_attr;
 
@@ -24,6 +25,7 @@ pub struct MethodBuilder {
     pub(crate) signature: Option<String>,
     pub(crate) synthetic: bool,
     pub(crate) deprecated: bool,
+    pub(crate) annotations: Vec<Annotation>,
 }
 
 impl MethodBuilder {
@@ -76,6 +78,13 @@ impl MethodBuilder {
         self
     }
 
+    /// Attach a runtime-visible or -invisible annotation to the method.
+    #[must_use]
+    pub fn annotation(mut self, annotation: Annotation) -> Self {
+        self.annotations.push(annotation);
+        self
+    }
+
     /// Attach a raw attribute to the emitted `method_info`.
     #[must_use]
     pub fn attribute(mut self, attr: Attribute) -> Self {
@@ -122,6 +131,7 @@ impl MethodBuilder {
         if self.deprecated {
             push_attr(pool, &mut attributes, Attribute::Deprecated)?;
         }
+        push_annotation_attrs(pool, &mut attributes, self.annotations)?;
         for a in self.extra_attributes {
             push_attr(pool, &mut attributes, a)?;
         }

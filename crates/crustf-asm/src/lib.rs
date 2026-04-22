@@ -11,6 +11,7 @@
 extern crate alloc;
 
 pub mod access;
+pub mod annotation;
 pub mod builder;
 pub mod code;
 pub mod field;
@@ -19,6 +20,7 @@ pub mod method;
 mod util;
 
 pub use access::AccessFlags;
+pub use annotation::{Annotation, ElementValue};
 pub use builder::ClassFileBuilder;
 pub use code::CodeBuilder;
 pub use field::{FieldBuilder, FieldConstant};
