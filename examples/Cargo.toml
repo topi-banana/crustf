@@ -1,0 +1,17 @@
+[package]
+name = "crustf-examples"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "hello_world"
+path = "src/hello_world.rs"
+
+[dependencies]
+crustf = { workspace = true }
+
+[lints]
+workspace = true

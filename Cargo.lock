@@ -25,6 +25,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "crustf-examples"
+version = "0.1.0"
+dependencies = [
+ "crustf",
+]
+
+[[package]]
 name = "crustf-jvm-integration-tests"
 version = "0.1.0"
 dependencies = [

@@ -1,6 +1,12 @@
 [workspace]
 resolver = "2"
-members = ["crates/crustf-spec", "crates/crustf-asm", "crates/crustf", "tests/jvm-integration"]
+members = [
+    "crates/crustf-spec",
+    "crates/crustf-asm",
+    "crates/crustf",
+    "examples",
+    "tests/jvm-integration",
+]
 
 [workspace.package]
 version = "0.1.0"
