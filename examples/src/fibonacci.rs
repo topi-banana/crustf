@@ -17,7 +17,7 @@
 
 use std::env;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use crustf::{AccessFlags, ClassFileBuilder, MethodBuilder};
@@ -25,34 +25,32 @@ use crustf::{AccessFlags, ClassFileBuilder, MethodBuilder};
 const CLASS_NAME: &str = "Fibonacci";
 
 fn main() -> ExitCode {
-    let bytes = match build_class() {
-        Ok(b) => b,
-        Err(e) => {
-            eprintln!("failed to build class: {e}");
-            return ExitCode::FAILURE;
-        }
-    };
-
     let out_dir = env::args()
         .nth(1)
         .map(PathBuf::from)
         .unwrap_or_else(env::temp_dir);
-    if let Err(e) = fs::create_dir_all(&out_dir) {
-        eprintln!("failed to create {}: {e}", out_dir.display());
-        return ExitCode::FAILURE;
+    match run(&out_dir) {
+        Ok(path) => {
+            println!("wrote {}", path.display());
+            println!("run with:");
+            println!("    java -cp {} {CLASS_NAME}", out_dir.display());
+            println!();
+            println!("expected output: 0 1 1 2 3 5 8 13 21 34 (one per line)");
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("error: {e}");
+            ExitCode::FAILURE
+        }
     }
-    let path = out_dir.join(format!("{CLASS_NAME}.class"));
-    if let Err(e) = fs::write(&path, &bytes) {
-        eprintln!("failed to write {}: {e}", path.display());
-        return ExitCode::FAILURE;
-    }
+}
 
-    println!("wrote {} ({} bytes)", path.display(), bytes.len());
-    println!("run with:");
-    println!("    java -cp {} {CLASS_NAME}", out_dir.display());
-    println!();
-    println!("expected output: 0 1 1 2 3 5 8 13 21 34 (one per line)");
-    ExitCode::SUCCESS
+fn run(out_dir: &Path) -> Result<PathBuf, Box<dyn std::error::Error>> {
+    fs::create_dir_all(out_dir)?;
+    let bytes = build_class()?;
+    let path = out_dir.join(format!("{CLASS_NAME}.class"));
+    fs::write(&path, &bytes)?;
+    Ok(path)
 }
 
 fn build_class() -> crustf::Result<Vec<u8>> {
