@@ -10,8 +10,17 @@ publish = false
 name = "hello_world"
 path = "src/hello_world.rs"
 
+[[bin]]
+name = "minecraft_mod_test"
+path = "src/minecraft_mod_test.rs"
+
 [dependencies]
-crustf = { workspace = true }
+# Re-enable `std` on top of the workspace-disabled defaults so crustf::Error
+# implements std::error::Error and `?` can bubble it into Box<dyn Error>.
+crustf = { workspace = true, features = ["std"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+zip = { version = "2", default-features = false, features = ["deflate"] }
 
 [lints]
 workspace = true
