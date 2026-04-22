@@ -78,6 +78,9 @@ impl Annotation {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ElementValue {
     Byte(i8),
+    /// UTF-16 code unit (may be a lone surrogate half); not Rust's `char`
+    /// because JVMS §4.7.16.1 `char_value` admits unpaired surrogates that
+    /// `char` rejects.
     Char(u16),
     Short(i16),
     Int(i32),
@@ -101,12 +104,6 @@ pub enum ElementValue {
 }
 
 impl ElementValue {
-    /// Sugar for `ElementValue::Annotation(Box::new(inner))`.
-    #[must_use]
-    pub fn from_annotation(inner: Annotation) -> Self {
-        Self::Annotation(Box::new(inner))
-    }
-
     pub(crate) fn resolve(&self, pool: &mut ConstantPool) -> Result<SpecElementValue> {
         Ok(match self {
             Self::Byte(v) => SpecElementValue::Byte(pool.intern(Constant::Integer(i32::from(*v)))?),
@@ -146,7 +143,7 @@ impl ElementValue {
 
 impl From<Annotation> for ElementValue {
     fn from(a: Annotation) -> Self {
-        Self::from_annotation(a)
+        Self::Annotation(Box::new(a))
     }
 }
 
@@ -160,23 +157,29 @@ pub(crate) fn push_annotation_attrs(
     if annotations.is_empty() {
         return Ok(());
     }
-    let (visible, invisible): (Vec<_>, Vec<_>) = annotations.into_iter().partition(|a| a.visible);
-    if !visible.is_empty() {
-        let mut resolved = Vec::with_capacity(visible.len());
-        for a in &visible {
-            resolved.push(a.resolve(pool)?);
+    // Single-pass resolution: the pool scan inside `resolve` is the
+    // expensive step, so resolving once per annotation and routing into
+    // the pre-split buckets is strictly cheaper than `partition` + two
+    // resolve loops — and removes the symmetric duplication of the two
+    // `if !empty { push_attr(...) }` blocks.
+    let mut visible = Vec::new();
+    let mut invisible = Vec::new();
+    for a in &annotations {
+        let resolved = a.resolve(pool)?;
+        if a.visible {
+            visible.push(resolved);
+        } else {
+            invisible.push(resolved);
         }
-        crate::util::push_attr(pool, attrs, Attribute::RuntimeVisibleAnnotations(resolved))?;
+    }
+    if !visible.is_empty() {
+        crate::util::push_attr(pool, attrs, Attribute::RuntimeVisibleAnnotations(visible))?;
     }
     if !invisible.is_empty() {
-        let mut resolved = Vec::with_capacity(invisible.len());
-        for a in &invisible {
-            resolved.push(a.resolve(pool)?);
-        }
         crate::util::push_attr(
             pool,
             attrs,
-            Attribute::RuntimeInvisibleAnnotations(resolved),
+            Attribute::RuntimeInvisibleAnnotations(invisible),
         )?;
     }
     Ok(())

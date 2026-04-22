@@ -8,6 +8,11 @@
 //! * [`spec`] — on-disk data model (`ClassFile`, `ConstantPool`, `Attribute`,
 //!   `Instruction`, …) and the binary encoder
 //!
+//! `Annotation` and `ElementValue` exist in both layers. The umbrella root
+//! re-exports the ergonomic builder-layer versions (`crustf::Annotation`);
+//! reach for `crustf::spec::Annotation` only when you need the on-disk
+//! indexed form.
+//!
 //! ```no_run
 //! use crustf::{AccessFlags, ClassFileBuilder, MethodBuilder};
 //!
