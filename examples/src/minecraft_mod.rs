@@ -7,8 +7,8 @@
 //! `<.minecraft>/mods/`.
 //!
 //! ```text
-//! cargo run -p crustf-examples --bin minecraft_mod_test
-//! cargo run -p crustf-examples --bin minecraft_mod_test -- /tmp/myout
+//! cargo run -p crustf-examples --bin minecraft_mod
+//! cargo run -p crustf-examples --bin minecraft_mod -- /tmp/myout
 //! ```
 //!
 //! The annotations on the class and method are the full Mixin shape —

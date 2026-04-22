@@ -15,8 +15,8 @@ name = "fibonacci"
 path = "src/fibonacci.rs"
 
 [[bin]]
-name = "minecraft_mod_test"
-path = "src/minecraft_mod_test.rs"
+name = "minecraft_mod"
+path = "src/minecraft_mod.rs"
 
 [dependencies]
 # Re-enable `std` on top of the workspace-disabled defaults so crustf::Error
