@@ -35,11 +35,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use crustf_asm as asm;
+pub use crustf_jar_builder as jar;
 pub use crustf_spec as spec;
 
 pub use crustf_asm::{
     AccessFlags, ClassFileBuilder, CodeBuilder, FieldBuilder, FieldConstant, Label, MethodBuilder,
 };
+pub use crustf_jar_builder::{JarBuilder, Manifest, ZipWriter};
 pub use crustf_spec::{
     encode, Annotation, ArrayType, Attribute, BootstrapMethod, ClassAccess, ClassFile,
     CodeAttribute, Constant, ConstantPool, ConstantTag, ElementValue, Error, ExceptionHandler,

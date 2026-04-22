@@ -12,10 +12,11 @@ categories = ["compilers", "encoding"]
 
 [features]
 default = ["std"]
-std = ["crustf-spec/std", "crustf-asm/std"]
+std = ["crustf-spec/std", "crustf-asm/std", "crustf-jar-builder/std"]
 
 [dependencies]
 crustf-asm = { workspace = true }
+crustf-jar-builder = { workspace = true }
 crustf-spec = { workspace = true }
 
 [lints]

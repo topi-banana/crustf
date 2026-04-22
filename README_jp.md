@@ -46,10 +46,11 @@ Hello from assemb!
 ```
 crustf/
 ├── crates/
-│   ├── crustf-spec/   データモデルとバイナリエンコーダ (JVMS §4)
-│   ├── crustf-asm/    fluent ビルダー層 (ラベル・プール解決)
-│   └── crustf/        クレート利用者向けの再エクスポート
-└── tests/jvm-integration/   生成バイト列を `java` で実際に動かす E2E
+│   ├── crustf-spec/          データモデルとバイナリエンコーダ (JVMS §4)
+│   ├── crustf-asm/           fluent ビルダー層 (ラベル・プール解決)
+│   ├── crustf-jar-builder/   JAR / ZIP ライター、no_std + alloc、WASM 安全
+│   └── crustf/               クレート利用者向けの再エクスポート
+└── tests/jvm-integration/    生成バイト列を `java` で実際に動かす E2E
 ```
 
 各クレートは `cargo doc --open` でドキュメントを確認できます。依存方向は
@@ -65,6 +66,34 @@ crustf/
 * 200 種以上の opcode (予約された `breakpoint`、`impdep1`、`impdep2` を含
   む) と全 `wide` 変形命令を enum バリアントで表現。
 * `std` feature を無効化すれば `#![no_std]`。
+
+### `crustf-jar-builder`
+
+* `JarBuilder` / `Manifest` / 低レベル `ZipWriter` を提供。
+* STORED (method 0) 方式の ZIP 2.0 アーカイブを書き出す。`java -jar`、
+  `JarFile`、`JarInputStream` が要求するサブセットを網羅。
+* CRC-32 (IEEE 802.3 / PKZIP 多項式) はテーブルを `const fn` で生成す
+  るインライン実装で依存ゼロ。
+* `alloc` 以外の依存なし。`wasm32-unknown-unknown` や `wasm32-wasip1`
+  へクロスコンパイル可能。
+* `Manifest` は JAR 仕様の 72 バイト折り返しを自動処理、`Main-Class`
+  のスラッシュをドットに変換。
+
+```rust
+use crustf::{AccessFlags, ClassFileBuilder, JarBuilder, MethodBuilder};
+
+let class_bytes = ClassFileBuilder::new("HelloJar")
+    .method(/* <init>, main ... */)
+    .build()?;
+
+let jar_bytes = JarBuilder::new()
+    .main_class("HelloJar")
+    .file("HelloJar.class", class_bytes)
+    .build()?;
+
+std::fs::write("hello.jar", &jar_bytes)?;
+// $ java -jar hello.jar
+```
 
 ### `crustf-asm`
 
@@ -111,6 +140,7 @@ crustf/
 | `comparisons.rs` | `lcmp`、`ifnull`、`ifnonnull` |
 | `stack_ops.rs` | `dup`、`swap`、`pop` |
 | `exceptions.rs` | `athrow`、`exception_table` (try/catch) |
+| `jar.rs` | `java -jar` 経由で JAR を実行、マニフェスト属性 |
 
 全テストを実行:
 
