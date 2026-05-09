@@ -1,0 +1,29 @@
+[package]
+name = "crustf-examples"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "example_hello_world"
+path = "src/hello_world.rs"
+
+[[bin]]
+name = "example_fibonacci"
+path = "src/fibonacci.rs"
+
+[[bin]]
+name = "example_minecraft_mod"
+path = "src/minecraft_mod.rs"
+
+[dependencies]
+# Re-enable `std` on top of the workspace-disabled defaults so crustf::Error
+# implements std::error::Error and `?` can bubble it into Box<dyn Error>.
+crustf = { workspace = true, features = ["std"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lints]
+workspace = true

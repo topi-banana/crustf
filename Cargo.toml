@@ -5,6 +5,7 @@ members = [
     "crates/crustf-asm",
     "crates/crustf-jar-builder",
     "crates/crustf",
+    "examples",
     "tests/jvm-integration",
 ]
 

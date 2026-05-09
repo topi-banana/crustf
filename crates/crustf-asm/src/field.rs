@@ -9,6 +9,7 @@ use crustf_spec::error::Result;
 use crustf_spec::{Field, FieldAccess};
 
 use crate::access::AccessFlags;
+use crate::annotation::{push_annotation_attrs, Annotation};
 use crate::util::push_attr;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -29,6 +30,7 @@ pub struct FieldBuilder {
     pub(crate) signature: Option<String>,
     pub(crate) synthetic: bool,
     pub(crate) deprecated: bool,
+    pub(crate) annotations: Vec<Annotation>,
     pub(crate) extra_attributes: Vec<Attribute>,
 }
 
@@ -69,6 +71,13 @@ impl FieldBuilder {
     #[must_use]
     pub fn deprecated(mut self) -> Self {
         self.deprecated = true;
+        self
+    }
+
+    /// Attach a runtime-visible or -invisible annotation to the field.
+    #[must_use]
+    pub fn annotation(mut self, annotation: Annotation) -> Self {
+        self.annotations.push(annotation);
         self
     }
 
@@ -113,6 +122,7 @@ impl FieldBuilder {
         if self.deprecated {
             push_attr(pool, &mut attributes, Attribute::Deprecated)?;
         }
+        push_annotation_attrs(pool, &mut attributes, self.annotations)?;
         for a in self.extra_attributes {
             push_attr(pool, &mut attributes, a)?;
         }

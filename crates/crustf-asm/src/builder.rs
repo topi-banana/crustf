@@ -11,6 +11,7 @@ use crustf_spec::version::{Version, JAVA_5};
 use crustf_spec::{encode, ClassAccess};
 
 use crate::access::AccessFlags;
+use crate::annotation::{push_annotation_attrs, Annotation};
 use crate::field::FieldBuilder;
 use crate::method::MethodBuilder;
 use crate::util::push_attr;
@@ -29,6 +30,7 @@ pub struct ClassFileBuilder {
     nest_host: Option<String>,
     nest_members: Vec<String>,
     permitted_subclasses: Vec<String>,
+    annotations: Vec<Annotation>,
     extra_attributes: Vec<Attribute>,
 }
 
@@ -55,6 +57,7 @@ impl ClassFileBuilder {
             nest_host: None,
             nest_members: Vec::new(),
             permitted_subclasses: Vec::new(),
+            annotations: Vec::new(),
             extra_attributes: Vec::new(),
         }
     }
@@ -133,6 +136,13 @@ impl ClassFileBuilder {
         self
     }
 
+    /// Attach a runtime-visible or -invisible annotation to the class.
+    #[must_use]
+    pub fn annotation(mut self, annotation: Annotation) -> Self {
+        self.annotations.push(annotation);
+        self
+    }
+
     #[must_use]
     pub fn attribute(mut self, attr: Attribute) -> Self {
         self.extra_attributes.push(attr);
@@ -204,6 +214,7 @@ impl ClassFileBuilder {
                 Attribute::PermittedSubclasses { classes },
             )?;
         }
+        push_annotation_attrs(&mut pool, &mut attributes, self.annotations)?;
         for a in self.extra_attributes {
             push_attr(&mut pool, &mut attributes, a)?;
         }

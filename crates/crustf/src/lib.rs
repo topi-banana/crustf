@@ -8,6 +8,11 @@
 //! * [`spec`] — on-disk data model (`ClassFile`, `ConstantPool`, `Attribute`,
 //!   `Instruction`, …) and the binary encoder
 //!
+//! `Annotation` and `ElementValue` exist in both layers. The umbrella root
+//! re-exports the ergonomic builder-layer versions (`crustf::Annotation`);
+//! reach for `crustf::spec::Annotation` only when you need the on-disk
+//! indexed form.
+//!
 //! ```no_run
 //! use crustf::{AccessFlags, ClassFileBuilder, MethodBuilder};
 //!
@@ -39,15 +44,19 @@ pub use crustf_jar_builder as jar;
 pub use crustf_spec as spec;
 
 pub use crustf_asm::{
-    AccessFlags, ClassFileBuilder, CodeBuilder, FieldBuilder, FieldConstant, Label, MethodBuilder,
+    AccessFlags, Annotation, ClassFileBuilder, CodeBuilder, ElementValue, FieldBuilder,
+    FieldConstant, Label, MethodBuilder,
 };
+// `Annotation` / `ElementValue` live in both layers; the spec versions are
+// reachable via `crustf::spec::{Annotation, ElementValue}`, while the names
+// in the umbrella root refer to the ergonomic builder layer.
 pub use crustf_jar_builder::{JarBuilder, Manifest, ZipWriter};
 pub use crustf_spec::{
-    encode, Annotation, ArrayType, Attribute, BootstrapMethod, ClassAccess, ClassFile,
-    CodeAttribute, Constant, ConstantPool, ConstantTag, ElementValue, Error, ExceptionHandler,
-    Field, FieldAccess, FieldDescriptor, InnerClass, InnerClassAccess, Instruction,
-    LineNumberEntry, LocalVariableEntry, LocalVariableTypeEntry, Method, MethodAccess,
-    MethodDescriptor, MethodParameter, ModuleAttribute, ParameterAccess, RecordComponent,
-    ReferenceKind, Result, StackMapFrame, TypeAnnotation, VerificationType, Version,
-    WideInstruction, JAVA_11, JAVA_17, JAVA_21, JAVA_25, JAVA_8,
+    encode, ArrayType, Attribute, BootstrapMethod, ClassAccess, ClassFile, CodeAttribute, Constant,
+    ConstantPool, ConstantTag, Error, ExceptionHandler, Field, FieldAccess, FieldDescriptor,
+    InnerClass, InnerClassAccess, Instruction, LineNumberEntry, LocalVariableEntry,
+    LocalVariableTypeEntry, Method, MethodAccess, MethodDescriptor, MethodParameter,
+    ModuleAttribute, ParameterAccess, RecordComponent, ReferenceKind, Result, StackMapFrame,
+    TypeAnnotation, VerificationType, Version, WideInstruction, JAVA_11, JAVA_17, JAVA_21, JAVA_25,
+    JAVA_8,
 };
