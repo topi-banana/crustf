@@ -7,15 +7,15 @@ license.workspace = true
 publish = false
 
 [[bin]]
-name = "hello_world"
+name = "example_hello_world"
 path = "src/hello_world.rs"
 
 [[bin]]
-name = "fibonacci"
+name = "example_fibonacci"
 path = "src/fibonacci.rs"
 
 [[bin]]
-name = "minecraft_mod"
+name = "example_minecraft_mod"
 path = "src/minecraft_mod.rs"
 
 [dependencies]
