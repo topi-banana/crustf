@@ -24,7 +24,6 @@ path = "src/minecraft_mod.rs"
 crustf = { workspace = true, features = ["std"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-zip = { version = "2", default-features = false, features = ["deflate"] }
 
 [lints]
 workspace = true

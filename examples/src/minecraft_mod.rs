@@ -18,15 +18,14 @@
 
 use std::collections::BTreeMap;
 use std::env;
-use std::fs::{self, File};
-use std::io::{BufWriter, Write};
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use crustf::{AccessFlags, Annotation, ClassFileBuilder, ElementValue, MethodBuilder, Version};
+use crustf::{
+    AccessFlags, Annotation, ClassFileBuilder, ElementValue, JarBuilder, MethodBuilder, Version,
+};
 use serde::Serialize;
-use zip::write::SimpleFileOptions;
-use zip::{CompressionMethod, ZipWriter};
 
 const CLASS_INTERNAL: &str = "com/example/mixin/HelloModMixin";
 const MIXIN_PACKAGE: &str = "com.example.mixin";
@@ -91,32 +90,26 @@ fn run(out_dir: &Path) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let fabric_json = serde_json::to_string_pretty(&fabric_mod_descriptor())?;
     let mixin_json = serde_json::to_string_pretty(&mixin_config())?;
 
-    let jar_path = out_dir.join(format!("{MOD_ID}.jar"));
-    // `BufWriter` amortises the many small header writes the ZIP writer
-    // performs per entry; without it each header is a separate syscall.
-    let mut jar = ZipWriter::new(BufWriter::new(File::create(&jar_path)?));
-    let opts = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
-
-    jar.start_file("META-INF/MANIFEST.MF", opts)?;
-    jar.write_all(b"Manifest-Version: 1.0\n")?;
-
-    jar.start_file("fabric.mod.json", opts)?;
-    jar.write_all(fabric_json.as_bytes())?;
-
-    jar.start_file(format!("{MOD_ID}.mixins.json"), opts)?;
-    jar.write_all(mixin_json.as_bytes())?;
-
-    jar.start_file(format!("{CLASS_INTERNAL}.class"), opts)?;
-    jar.write_all(&class_bytes)?;
-
-    jar.finish()?;
-
     println!("--- fabric.mod.json ---");
     println!("{fabric_json}");
     println!();
     println!("--- {MOD_ID}.mixins.json ---");
     println!("{mixin_json}");
     println!();
+
+    // `JarBuilder` writes `META-INF/MANIFEST.MF` (with the JAR-mandated
+    // `Manifest-Version: 1.0`) as the first archive entry on its own —
+    // adding it via `.file()` would produce a duplicate. Fabric mods are
+    // loaded by Fabric Loader rather than `java -jar`, so no `Main-Class`
+    // is needed.
+    let jar_path = out_dir.join(format!("{MOD_ID}.jar"));
+    let jar_bytes = JarBuilder::new()
+        .file("fabric.mod.json", fabric_json)
+        .file(format!("{MOD_ID}.mixins.json"), mixin_json)
+        .file(format!("{CLASS_INTERNAL}.class"), class_bytes)
+        .build()?;
+    fs::write(&jar_path, jar_bytes)?;
+
     Ok(jar_path)
 }
 
