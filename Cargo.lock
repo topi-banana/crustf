@@ -55,6 +55,7 @@ name = "crustf"
 version = "0.1.0"
 dependencies = [
  "crustf-asm",
+ "crustf-jar-builder",
  "crustf-spec",
 ]
 
@@ -77,10 +78,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "crustf-jar-builder"
+version = "0.1.0"
+
+[[package]]
 name = "crustf-jvm-integration-tests"
 version = "0.1.0"
 dependencies = [
  "crustf",
+ "crustf-jar-builder",
 ]
 
 [[package]]

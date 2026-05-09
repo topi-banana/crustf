@@ -13,19 +13,27 @@ lives in:
   is modelled here.
 * `crates/crustf-asm/` — fluent builder. Owns label resolution, pool
   interning, auto narrow/wide encoding, `max_locals` inference.
+* `crates/crustf-jar-builder/` — ZIP 2.0 writer + `Manifest` + `JarBuilder`.
+  Zero external deps, STORED method only. `java -jar` is the integration
+  target.
 * `crates/crustf/` — re-export umbrella.
 * `tests/jvm-integration/` — E2E tests that spawn `java` on emitted bytes.
 
 ## Workspace invariants
 
-* Dependency direction is `spec → asm → crustf` only. Do not add an edge
+* Dependency direction is `spec → asm → crustf` only, with
+  `crustf-jar-builder` sitting alongside `asm` (no edges from it into the
+  bytecode crates — it is a generic archive writer). Do not add an edge
   from `spec` back up to `asm` or from the integration tests to spec
   internals. Tests that need to bypass the builder should reach through
   `crustf::spec::…`.
-* `crustf-spec` and `crustf-asm` must keep compiling for
-  `wasm32-unknown-unknown` with `--no-default-features`. Every direct
-  `std::*` use needs a `std` feature gate, or should be replaced with
-  `alloc::*` / `core::*`.
+* `crustf-spec`, `crustf-asm`, and `crustf-jar-builder` must keep
+  compiling for `wasm32-unknown-unknown` with `--no-default-features`.
+  Every direct `std::*` use needs a `std` feature gate, or should be
+  replaced with `alloc::*` / `core::*`.
+* `crustf-jar-builder` has zero external dependencies by design. Adding
+  a crate for compression or hashing needs explicit discussion because
+  it widens the WASM footprint.
 * No `unsafe`. The workspace sets `unsafe_code = "forbid"`.
 
 ## Default class file version
@@ -45,8 +53,9 @@ cargo build --workspace --all-targets --all-features
 cargo test  --workspace --all-features
 taplo format --check --diff
 cargo machete
-cargo build -p crustf-spec --target wasm32-unknown-unknown --no-default-features
-cargo build -p crustf-asm  --target wasm32-unknown-unknown --no-default-features
+cargo build -p crustf-spec        --target wasm32-unknown-unknown --no-default-features
+cargo build -p crustf-asm         --target wasm32-unknown-unknown --no-default-features
+cargo build -p crustf-jar-builder --target wasm32-unknown-unknown --no-default-features
 ```
 
 The GitHub workflow in `.github/workflows/ci.yml` runs exactly this set.

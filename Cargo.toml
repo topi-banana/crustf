@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/crustf-spec",
     "crates/crustf-asm",
+    "crates/crustf-jar-builder",
     "crates/crustf",
     "examples",
     "tests/jvm-integration",
@@ -22,6 +23,7 @@ categories = ["compilers", "encoding", "no-std"]
 [workspace.dependencies]
 crustf-spec = { version = "0.1.0", path = "crates/crustf-spec", default-features = false }
 crustf-asm = { version = "0.1.0", path = "crates/crustf-asm", default-features = false }
+crustf-jar-builder = { version = "0.1.0", path = "crates/crustf-jar-builder", default-features = false }
 crustf = { version = "0.1.0", path = "crates/crustf", default-features = false }
 
 bitflags = { version = "2.6", default-features = false }

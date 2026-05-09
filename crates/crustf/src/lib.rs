@@ -40,6 +40,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use crustf_asm as asm;
+pub use crustf_jar_builder as jar;
 pub use crustf_spec as spec;
 
 pub use crustf_asm::{
@@ -49,6 +50,7 @@ pub use crustf_asm::{
 // `Annotation` / `ElementValue` live in both layers; the spec versions are
 // reachable via `crustf::spec::{Annotation, ElementValue}`, while the names
 // in the umbrella root refer to the ergonomic builder layer.
+pub use crustf_jar_builder::{JarBuilder, Manifest, ZipWriter};
 pub use crustf_spec::{
     encode, ArrayType, Attribute, BootstrapMethod, ClassAccess, ClassFile, CodeAttribute, Constant,
     ConstantPool, ConstantTag, Error, ExceptionHandler, Field, FieldAccess, FieldDescriptor,

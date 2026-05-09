@@ -90,7 +90,9 @@ jobs:
           targets: wasm32-unknown-unknown,wasm32-wasip1
       - uses: Swatinem/rust-cache@v2
       - run: |
-          cargo build -p crustf-spec --target wasm32-unknown-unknown --no-default-features
-          cargo build -p crustf-asm  --target wasm32-unknown-unknown --no-default-features
-          cargo build -p crustf-spec --target wasm32-wasip1
-          cargo build -p crustf-asm  --target wasm32-wasip1
+          cargo build -p crustf-spec        --target wasm32-unknown-unknown --no-default-features
+          cargo build -p crustf-asm         --target wasm32-unknown-unknown --no-default-features
+          cargo build -p crustf-jar-builder --target wasm32-unknown-unknown --no-default-features
+          cargo build -p crustf-spec        --target wasm32-wasip1
+          cargo build -p crustf-asm         --target wasm32-wasip1
+          cargo build -p crustf-jar-builder --target wasm32-wasip1
