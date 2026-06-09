@@ -26,7 +26,7 @@ crustf-asm = { version = "0.1.0", path = "crates/crustf-asm", default-features =
 crustf-jar-builder = { version = "0.1.0", path = "crates/crustf-jar-builder", default-features = false }
 crustf = { version = "0.1.0", path = "crates/crustf", default-features = false }
 
-bitflags = { version = "2.6", default-features = false }
+bitflags = { version = "2.13", default-features = false }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
